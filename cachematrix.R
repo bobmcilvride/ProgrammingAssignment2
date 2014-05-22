@@ -1,15 +1,76 @@
-## Put comments here that give an overall description of what your
-## functions do
+## Overview:
+##
+## Matrix inversion is usually a costly computation and there may be some benefit 
+## to caching the inverse of a matrix rather than compute it repeatedly.
+##
+## These functions enable caching of the inverse of a square invertible matrix.
+##
+## See descriptions of each function below for details.
+##
+##
 
-## Write a short comment describing this function
-
+## Function:  makeCacheMatrix(x), where x is a matrix
+##
+## This function creates a special "matrix" object that can cache
+## its inverse.
+## 
+## Example:
+##
+## > x <- matrix(c(1,2,3,4), nrow=2, ncol=2)  # create a 2x2 matrix
+## > x
+##      [,1] [,2]
+## [1,]    1    3
+## [2,]    2    4
+##
+## > a <- makeCacheMatrix(x)   # cache the inverse of x
+## > a$get()
+##      [,1] [,2]
+## [1,]    1    3
+## [2,]    2    4
+## 
 makeCacheMatrix <- function(x = matrix()) {
-
+    m <- NULL
+    set <- function(y) {
+        x <<- y
+        m <<- NULL
+    }
+    get <- function() x
+    setmatrix <- function(solve) m <<- solve
+    getmatrix <- function() m
+    list(set = set, get = get,
+         setmatrix = setmatrix,
+         getmatrix = getmatrix)  
 }
 
-
-## Write a short comment describing this function
-
+## Function:  solveCache(x), where x is a matrix
+##
+## This function calculates the inverse of the special "matrix"
+## returned by `makeCacheMatrix` above. If the inverse has
+## already been calculated (and the matrix has not changed), then
+## `cacheSolve` will retrieve the inverse from the cache.
+##
+## Example:
+##
+## > cacheSolve(a)
+##      [,1] [,2]
+## [1,]   -2  1.5
+## [2,]    1 -0.5
+##
+## > cacheSolve(a)
+## getting cached data
+##      [,1] [,2]
+## [1,]   -2  1.5
+## [2,]    1 -0.5
+##
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+    ## Return a matrix that is the inverse of 'x'
+    m <- x$getmatrix()
+    if(!is.null(m)) {
+        message("getting cached data")
+        return(m)
+    }
+    data <- x$get()
+    m <- solve(data, ...)
+    x$setmatrix(m)
+    m
 }
